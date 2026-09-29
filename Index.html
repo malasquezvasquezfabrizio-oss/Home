@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EcoHome & Emotion - Bellavista</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        eco: { 50: '#ecfdf5', 500: '#10b981', 600: '#059669', 700: '#047857', 900: '#064e3b' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-eco-500 selection:text-white">
+
+    <!-- AUDIO SINTETIZADOR WEB -->
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'pop') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'success') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+        }
+    </script>
+
+    <!-- PANTALLA DE INICIO DE SESIÓN CON AVATARES DE FRUTAS -->
+    <div id="loginScreen" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-4">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl text-center">
+            <div class="w-20 h-20 bg-eco-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-eco-400 text-3xl shadow-inner">
+                <i class="fa-solid fa-seedling"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-white mb-1">EcoHome & Emotion</h1>
+            <p class="text-xs text-eco-400 font-semibold mb-6"><i class="fa-solid fa-location-dot mr-1"></i> Bellavista, San Martín, Perú (S/ 0.85/kWh)</p>
+            <p class="text-sm text-slate-300 mb-6">Elige tu avatar de fruta selvática favorita para entrar y guardar tu progreso automáticamente:</p>
+            
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <button onclick="selectAvatar('Camu Camu', '🍒', 'EcoGuardián_CamuCamu')" class="p-3 bg-slate-800/80 hover:bg-eco-600/20 border border-slate-700 hover:border-eco-500 rounded-2xl flex flex-col items-center transition group">
+                    <span class="text-3xl mb-1 group-hover:scale-110 transition">🍒</span>
+                    <span class="text-xs font-semibold text-slate-200">Camu Camu</span>
+                </button>
+                <button onclick="selectAvatar('Aguaje', '🌴', 'Guerrero_Aguaje')" class="p-3 bg-slate-800/80 hover:bg-eco-600/20 border border-slate-700 hover:border-eco-500 rounded-2xl flex flex-col items-center transition group">
+                    <span class="text-3xl mb-1 group-hover:scale-110 transition">🌴</span>
+                    <span class="text-xs font-semibold text-slate-200">Aguaje</span>
+                </button>
+                <button onclick="selectAvatar('Cocona', '🟡', 'Maestro_Cocona')" class="p-3 bg-slate-800/80 hover:bg-eco-600/20 border border-slate-700 hover:border-eco-500 rounded-2xl flex flex-col items-center transition group">
+                    <span class="text-3xl mb-1 group-hover:scale-110 transition">🟡</span>
+                    <span class="text-xs font-semibold text-slate-200">Cocona</span>
+                </button>
+                <button onclick="selectAvatar('Plátano', '🍌', 'Socio_Platano')" class="p-3 bg-slate-800/80 hover:bg-eco-600/20 border border-slate-700 hover:border-eco-500 rounded-2xl flex flex-col items-center transition group">
+                    <span class="text-3xl mb-1 group-hover:scale-110 transition">🍌</span>
+                    <span class="text-xs font-semibold text-slate-200">Plátano</span>
+                </button>
+                <button onclick="selectAvatar('Maracuyá', '🍊', 'Eco_Maracuya')" class="p-3 bg-slate-800/80 hover:bg-eco-600/20 border border-slate-700 hover:border-eco-500 rounded-2xl flex flex-col items-center transition group">
+                    <span class="text-3xl mb-1 group-hover:scale-110 transition">🍊</span>
+                    <span class="text-xs font-semibold text-slate-200">Maracuyá</span>
+                </button>
+                <button onclick="selectAvatar('Copoazú', '🥥', 'Gestor_Copoazu')" class="p-3 bg-slate-800/80 hover:bg-eco-600/20 border border-slate-700 hover:border-eco-500 rounded-2xl flex flex-col items-center transition group">
+                    <span class="text-3xl mb-1 group-hover:scale-110 transition">🥥</span>
+                    <span class="text-xs font-semibold text-slate-200">Copoazú</span>
+                </button>
+            </div>
+            <p class="text-xs text-slate-500">Cada cuenta almacena su propia XP, artefactos y retos de forma independiente en tu dispositivo.</p>
+        </div>
+    </div>
+
+    <!-- APLICACIÓN PRINCIPAL -->
+    <div id="mainApp" class="hidden flex-1 flex flex-col pb-24">
+        <!-- HEADER -->
+        <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 sticky top-0 z-30 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div id="userAvatarDisplay" class="w-10 h-10 bg-eco-500/20 border border-eco-500/40 rounded-full flex items-center justify-center text-xl">🍒</div>
+                <div>
+                    <h2 id="userNameDisplay" class="text-sm font-bold text-white">EcoGuardián</h2>
+                    <span class="text-xs text-eco-400 font-medium"><i class="fa-solid fa-bolt text-[10px]"></i> S/ 0.85 / kWh</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="bg-slate-800 border border-slate-700 px-3 py-1 rounded-full flex items-center space-x-2">
+                    <i class="fa-solid fa-star text-amber-400 text-xs"></i>
+                    <span id="userXpDisplay" class="text-xs font-bold text-amber-300">0 XP</span>
+                </div>
+                <button onclick="logout()" class="w-8 h-8 bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 rounded-full flex items-center justify-center transition" title="Cambiar cuenta">
+                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- CONTENIDO TABS -->
+        <main class="flex-1 max-w-2xl w-full mx-auto p-4">
+            
+            <!-- TAB 1: ENERGÍA & GASTOS -->
+            <section id="tab-energy" class="space-y-4">
+                <div class="bg-gradient-to-r from-eco-900/40 to-slate-900 border border-eco-500/30 rounded-2xl p-4 shadow-lg">
+                    <h3 class="text-base font-bold text-white mb-1"><i class="fa-solid fa-calculator text-eco-400 mr-2"></i>Calculadora y Gastos de Hogar</h3>
+                    <p class="text-xs text-slate-300 mb-4">Agrega tus artefactos reales y horas de uso para calcular tu recibo mensual en Bellavista.</p>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-xl text-center">
+                            <span class="text-[10px] text-slate-400 block">CONSUMO TOTAL</span>
+                            <span id="totalKwh" class="text-lg font-bold text-eco-400">0.00 kWh</span>
+                        </div>
+                        <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-xl text-center">
+                            <span class="text-[10px] text-slate-400 block">GASTO ESTIMADO</span>
+                            <span id="totalCost" class="text-lg font-bold text-amber-400">S/ 0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- SELECTOR RÁPIDO DE ARTEFACTOS TÍPICOS -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-300 block">Añadir artefacto rápido:</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="addPresetAppliance('Ventilador', 0.075, 6)" class="p-2 bg-slate-800/90 hover:bg-eco-600/30 border border-slate-700 hover:border-eco-500 rounded-xl text-xs text-left transition">
+                                <i class="fa-solid fa-fan text-eco-400 mb-1 block"></i> Ventilador (75W)
+                            </button>
+                            <button onclick="addPresetAppliance('Refrigeradora', 0.150, 24)" class="p-2 bg-slate-800/90 hover:bg-eco-600/30 border border-slate-700 hover:border-eco-500 rounded-xl text-xs text-left transition">
+                                <i class="fa-solid fa-snowflake text-eco-400 mb-1 block"></i> Refrigeradora
+                            </button>
+                            <button onclick="addPresetAppliance('Foco LED', 0.015, 5)" class="p-2 bg-slate-800/90 hover:bg-eco-600/30 border border-slate-700 hover:border-eco-500 rounded-xl text-xs text-left transition">
+                                <i class="fa-solid fa-lightbulb text-eco-400 mb-1 block"></i> Foco LED (15W)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LISTA DE ARTEFACTOS -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-bold text-white">Tus Artefactos Registrados</h4>
+                        <button onclick="openCustomModal()" class="px-3 py-1 bg-eco-600 hover:bg-eco-500 text-white rounded-xl text-xs font-semibold transition">
+                            <i class="fa-solid fa-plus mr-1"></i> Personalizado
+                        </button>
+                    </div>
+                    <div id="appliancesList" class="space-y-2">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: RETOS Y ACCIÓN -->
+            <section id="tab-challenges" class="hidden space-y-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+                    <h3 class="text-base font-bold text-white mb-1"><i class="fa-solid fa-list-check text-eco-400 mr-2"></i>Retos de Conservación del Hogar</h3>
+                    <p class="text-xs text-slate-300 mb-4">Marca los retos cumplidos para ganar XP y mejorar la eficiencia de tu hogar.</p>
+                    
+                    <div id="challengesList" class="space-y-2.5">
+                        <!-- Checklists interactivos -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: SOCIOEMOCIONAL -->
+            <section id="tab-emotion" class="hidden space-y-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+                    <h3 class="text-base font-bold text-white mb-1"><i class="fa-solid fa-heart-pulse text-rose-400 mr-2"></i>Soporte Socioemocional</h3>
+                    <p class="text-xs text-slate-300 mb-4">Espacio para gestionar el estrés y guiar la resolución de problemas en el hogar.</p>
+
+                    <!-- Respiración 4-7-8 -->
+                    <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl text-center mb-4">
+                        <h4 class="text-xs font-bold text-slate-200 mb-2">Pausa Activa: Respiración Guiada</h4>
+                        <div id="breathCircle" class="w-24 h-24 mx-auto bg-eco-500/20 border-2 border-eco-500 rounded-full flex items-center justify-center text-xs font-bold text-eco-300 mb-3 transition-all duration-1000">
+                            Listo
+                        </div>
+                        <button onclick="startBreathing()" class="px-4 py-1.5 bg-eco-600 hover:bg-eco-500 text-white text-xs font-semibold rounded-xl transition">
+                            Iniciar Ejercicio (1 min)
+                        </button>
+                    </div>
+
+                    <!-- Resolución de Problemas -->
+                    <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl space-y-3">
+                        <h4 class="text-xs font-bold text-slate-200"><i class="fa-solid fa-brain text-amber-400 mr-1"></i> Guía Rápida de Solución de Conflictos</h4>
+                        <div class="text-xs text-slate-300 space-y-2">
+                            <p>1. <b>Identifica:</b> Reconoce el foco de tensión (gasto excesivo o estrés escolar).</p>
+                            <p>2. <b>Dialoga:</b> Comparte soluciones con tu familia en casa.</p>
+                            <p>3. <b>Actúa:</b> Aplica medidas de ahorro y pausas activas juntos.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- MENÚ DE NAVEGACIÓN INFERIOR -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 px-6 py-3 flex justify-around items-center z-30 max-w-2xl mx-auto">
+            <button onclick="switchTab('energy')" id="nav-energy" class="flex flex-col items-center text-eco-400 transition">
+                <i class="fa-solid fa-bolt text-lg mb-1"></i>
+                <span class="text-[10px] font-semibold">Energía</span>
+            </button>
+            <button onclick="switchTab('challenges')" id="nav-challenges" class="flex flex-col items-center text-slate-400 hover:text-slate-200 transition">
+                <i class="fa-solid fa-list-check text-lg mb-1"></i>
+                <span class="text-[10px] font-semibold">Retos</span>
+            </button>
+            <button onclick="switchTab('emotion')" id="nav-emotion" class="flex flex-col items-center text-slate-400 hover:text-slate-200 transition">
+                <i class="fa-solid fa-heart-pulse text-lg mb-1"></i>
+                <span class="text-[10px] font-semibold">Bienestar</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODAL AGREGAR ARTEFACTO PERSONALIZADO -->
+    <div id="customModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl">
+            <h3 class="text-base font-bold text-white mb-3">Agregar Artefacto</h3>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Nombre del artefacto:</label>
+                    <input type="text" id="customName" placeholder="Ej. Licuadora, Televisor" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-eco-500">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Potencia en Kilovatios (kW) [Ej: 0.1]:</label>
+                    <input type="number" step="0.01" id="customKw" placeholder="0.1" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-eco-500">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Horas de uso diario:</label>
+                    <input type="number" step="0.5" id="customHours" placeholder="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-eco-500">
+                </div>
+            </div>
+            <div class="flex space-x-2 mt-5">
+                <button onclick="closeCustomModal()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold transition">Cancelar</button>
+                <button onclick="saveCustomAppliance()" class="flex-1 py-2 bg-eco-600 hover:bg-eco-500 text-white rounded-xl text-xs font-semibold transition">Agregar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS DE GESTIÓN -->
+    <script>
+        const RATE = 0.85; // Tarifa Bellavista, San Martín (Electro Oriente S.A.)
+        let currentUser = null;
+        let userData = {
+            avatar: '🍒',
+            name: 'EcoGuardián',
+            xp: 0,
+            appliances: [],
+            challenges: [
+                { id: 1, text: 'Desconectar cargadores y artefactos en modo espera', done: false },
+                { id: 2, text: 'Apagar luces en habitaciones desocupadas', done: false },
+                { id: 3, text: 'Realizar una pausa activa de respiración en familia', done: false },
+                { id: 4, text: 'Revisar fugas de agua y llaves abiertas en casa', done: false }
+            ]
+        };
+
+        function selectAvatar(fruit, emoji, defaultName) {
+            playSound('pop');
+            currentUser = defaultName;
+            const saved = localStorage.getItem('ecohome_' + currentUser);
+            if (saved) {
+                userData = JSON.parse(saved);
+            } else {
+                userData.avatar = emoji;
+                userData.name = defaultName;
+                userData.xp = 0;
+                userData.appliances = [];
+            }
+            document.getElementById('userAvatarDisplay').innerText = emoji;
+            document.getElementById('userNameDisplay').innerText = defaultName;
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            updateUI();
+        }
+
+        function logout() {
+            playSound('pop');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        function saveUserData() {
+            if (currentUser) {
+                localStorage.setItem('ecohome_' + currentUser, JSON.stringify(userData));
+            }
+        }
+
+        function addXp(amount) {
+            userData.xp += amount;
+            playSound('success');
+            document.getElementById('userXpDisplay').innerText = userData.xp + ' XP';
+            saveUserData();
+        }
+
+        function switchTab(tab) {
+            playSound('pop');
+            ['energy', 'challenges', 'emotion'].forEach(t => {
+                document.getElementById('tab-' + t).classList.add('hidden');
+                document.getElementById('nav-' + t).classList.remove('text-eco-400');
+                document.getElementById('nav-' + t).classList.add('text-slate-400');
+            });
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+            document.getElementById('nav-' + tab).classList.remove('text-slate-400');
+            document.getElementById('nav-' + tab).classList.add('text-eco-400');
+        }
+
+        function addPresetAppliance(name, kw, hours) {
+            playSound('pop');
+            userData.appliances.push({ name, kw, hours });
+            addXp(15);
+            updateUI();
+        }
+
+        function openCustomModal() {
+            playSound('pop');
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        function closeCustomModal() {
+            playSound('pop');
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        function saveCustomAppliance() {
+            const name = document.getElementById('customName').value;
+            const kw = parseFloat(document.getElementById('customKw').value);
+            const hours = parseFloat(document.getElementById('customHours').value);
+            if (!name || isNaN(kw) || isNaN(hours)) {
+                alert('Por favor completa todos los campos correctamente.');
+                return;
+            }
+            userData.appliances.push({ name, kw, hours });
+            document.getElementById('customName').value = '';
+            document.getElementById('customKw').value = '';
+            document.getElementById('customHours').value = '';
+            closeCustomModal();
+            addXp(20);
+            updateUI();
+        }
+
+        function removeAppliance(index) {
+            playSound('pop');
+            userData.appliances.splice(index, 1);
+            updateUI();
+        }
+
+        function toggleChallenge(id) {
+            playSound('pop');
+            const ch = userData.challenges.find(c => c.id === id);
+            if (ch) {
+                ch.done = !ch.done;
+                if (ch.done) addXp(25);
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            saveUserData();
+            document.getElementById('userXpDisplay').innerText = userData.xp + ' XP';
+
+            // Calcular energía y costos
+            let totalKwhMonth = 0;
+            const listEl = document.getElementById('appliancesList');
+            listEl.innerHTML = '';
+
+            if (userData.appliances.length === 0) {
+                listEl.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">No hay artefactos registrados. Añade uno arriba.</div>`;
+            } else {
+                userData.appliances.forEach((app, idx) => {
+                    const monthlyKwh = app.kw * app.hours * 30;
+                    totalKwhMonth += monthlyKwh;
+                    listEl.innerHTML += `
+                        <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-3 rounded-xl text-xs">
+                            <div>
+                                <span class="font-bold text-white block">${app.name}</span>
+                                <span class="text-[10px] text-slate-400">${app.kw} kW • ${app.hours} hrs/día</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <span class="text-eco-400 font-semibold">S/ ${(monthlyKwh * RATE).toFixed(2)}</span>
+                                <button onclick="removeAppliance(${idx})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('totalKwh').innerText = totalKwhMonth.toFixed(2) + ' kWh';
+            document.getElementById('totalCost').innerText = 'S/ ' + (totalKwhMonth * RATE).toFixed(2);
+
+            // Renderizar retos
+            const challengesEl = document.getElementById('challengesList');
+            challengesEl.innerHTML = '';
+            userData.challenges.forEach(ch => {
+                challengesEl.innerHTML += `
+                    <label class="flex items-center space-x-3 bg-slate-950/60 border border-slate-800 p-3 rounded-xl text-xs cursor-pointer hover:border-slate-700 transition">
+                        <input type="checkbox" ${ch.done ? 'checked' : ''} onchange="toggleChallenge(${ch.id})" class="w-4 h-4 rounded text-eco-600 focus:ring-0 bg-slate-900 border-slate-700">
+                        <span class="${ch.done ? 'line-through text-slate-500' : 'text-slate-200 font-medium'}">${ch.text}</span>
+                    </label>
+                `;
+            });
+        }
+
+        // Temporizador de respiración
+        function startBreathing() {
+            playSound('pop');
+            const circle = document.getElementById('breathCircle');
+            circle.innerText = 'Inhala...';
+            setTimeout(() => { circle.innerText = 'Mantén...'; }, 4000);
+            setTimeout(() => { circle.innerText = 'Exhala...'; }, 11000);
+            setTimeout(() => { circle.innerText = '¡Listo!'; addXp(10); }, 16000);
+        }
+    </script>
+</body>
+</html>
